@@ -30,10 +30,9 @@ fees as (
             '{{ multiplier }}' as multiplier,
             volatility.volatility as volatility,
             {{ multiplier }} as multiplier,
-            least(coalesce(
-                {{ base_fee }} + exp(1 - volatility.volatility / volatility.rolling_mean_volatility) * {{ multiplier }},
-                {{ base_fee }}
-            ), 0.007) as fee_tier
+            {{ min_fee }} + ({{ max_fee }} - {{ min_fee }}) * 
+            (1 - exp(-{{ multiplier }} * coalesce(volatility.volatility, 0))) / 
+            (1 + exp(-{{ multiplier }} * coalesce(volatility.volatility, 0))) as fee_tier
         from {{ ref('int_mainnet_sim_swaps') }} as swaps
         left join volatility_stats as volatility
             on swaps.block_number = volatility.block_number
