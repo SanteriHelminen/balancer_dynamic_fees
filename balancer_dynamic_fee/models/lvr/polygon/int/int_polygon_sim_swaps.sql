@@ -33,7 +33,7 @@ final as (
                 then cex_data.price * (1 - swaps.fee_tier)
             else cex_data.price * (1 + swaps.fee_tier)
         end as price_target
-    from {{ ref('fct_polygon_sim_swaps swaps') }}
+    from {{ ref('fct_polygon_sim_swaps') }} swaps
     join {{ ref('fct_polygon_sim_pool_prices') }} pool_prices
         on swaps.pool_id = pool_prices.pool_id
         and swaps.pool_id = '{{ pool_id }}'
