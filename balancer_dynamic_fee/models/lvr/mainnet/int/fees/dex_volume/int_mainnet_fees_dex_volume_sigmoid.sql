@@ -1,6 +1,7 @@
 {{ 
     config(
-        materialized = 'table'
+        materialized = 'table',
+        tags = ['mainnet', 'mainnet_volume']
     ) 
 }}
 
@@ -12,7 +13,7 @@ with dex_data as (
     select
         block_number,
         pool_id,
-        volume  -- This is already normalized by reserves
+        volume
     from {{ ref('int_mainnet_dex_volume') }}
 ),
 

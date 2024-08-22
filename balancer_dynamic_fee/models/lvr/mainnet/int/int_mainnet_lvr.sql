@@ -1,6 +1,7 @@
 {{ 
     config(
-        materialized = 'table'
+        materialized = 'table',
+        tags = ['mainnet']
     ) 
 }}
 
@@ -18,9 +19,9 @@ pool_reserves as (
         reserves.pool_id,
         reserves.weight_0,
         reserves.weight_1,
-        reserves.reserve0,
-        reserves.reserve0 * prices.price as reserve_0_usd,
-        reserves.reserve1,
+        reserves.reserve_0,
+        reserves.reserve_0 * prices.price as reserve_0_usd,
+        reserves.reserve_1,
         case
             when reserves.token1_address = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
                 then multiply(reserves.reserve_1, prices.eth_price)
@@ -54,8 +55,8 @@ lvr_calculation as (
         pool_price,
         price_target,
         open_price,
-        reserve0,
-        reserve1,
+        reserve_0,
+        reserve_1,
         reserve_0_usd,
         reserve_1_usd,
         fee_tier,
@@ -76,7 +77,7 @@ lvr_calculation as (
 price_diff_percentiles as (
     select
         pool_id,
-        percentile_cont(0.9) within group (order by price_diff) as ninetyfifth_percentile
+        percentile_cont(0.90) within group (order by price_diff) as ninetyfifth_percentile
     from lvr_calculation
     group by pool_id
 ),
@@ -91,6 +92,8 @@ lvr_results AS (
         l.open_price,
         l.liquidity,
         l.executed_qty,
+        l.reserve_0_usd,
+        l.reserve_1_usd,
         if(l.can_have_lvr, l.executed_qty * ABS((l.open_price - l.average_price)/l.average_price), 0) AS lvr_value,
         if(l.can_have_lvr, l.fee_tier * l.executed_qty, 0) AS fee,
         l.can_have_lvr,

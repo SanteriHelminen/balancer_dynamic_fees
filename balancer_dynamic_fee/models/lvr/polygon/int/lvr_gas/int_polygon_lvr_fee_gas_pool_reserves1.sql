@@ -1,6 +1,7 @@
 {{ 
     config(
-        materialized = 'table'
+        materialized = 'table',
+        tags = ['polygon']
     ) 
 }}
 
@@ -25,8 +26,8 @@ with fees_data as (
 reserves_data as (
     select
         block_number,
-        reserve0,
-        reserve1
+        reserve_0,
+        reserve_1
     from {{ ref('fct_polygon_sim_liquidity') }}
 ),
 
@@ -53,8 +54,8 @@ pool_reserves as (
     select
         r.block_number,
         'ae8f935830f6b418804836eacb0243447b6d977c000200000000000000000ad1' as pool_id,
-        r.reserve0 * p.price as reserve_0_usd,
-        r.reserve1 as reserve_1_usd,
+        r.reserve_0 * p.price as reserve_0_usd,
+        r.reserve_1 as reserve_1_usd,
         f.fee_tier,
         f.fee_type,
         f.multiplier,

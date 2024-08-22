@@ -1,20 +1,18 @@
 {{ 
     config(
         materialized = 'table',
-        tags = ['polygon']
+        tags = ['arbitrum']
     ) 
 }}
 
 {% set fee_sources = [
-    'int_polygon_fees_gas_exponential',
-    'int_polygon_fees_gas_logarithmic',
-    'int_polygon_fees_gas_mean',
-    'int_polygon_fees_gas_sigmoid',
+    'int_arbitrum_fees_static'
 ] %}
 
 with fees_data as (
     {% for fee_source in fee_sources %}
     select
+        pool_id,
         block_number,
         fee_type,
         multiplier,
@@ -26,27 +24,33 @@ with fees_data as (
 
 reserves_data as (
     select
+        pool_id,
         block_number,
+        token0_address,
+        token1_address,
         reserve_0,
         reserve_1
-    from {{ ref('fct_polygon_sim_liquidity') }}
+    from {{ ref('fct_arbitrum_sim_liquidity') }}
 ),
 
 -- cte for swaps data
 swaps_data as (
     select
+        pool_id,
         block_number,
         price_target
-    from {{ ref('int_polygon_sim_swaps') }}
+    from {{ ref('int_arbitrum_sim_swaps') }}
 ),
 
 -- cte for prices data
 prices_data as (
     select
+        pool_id,
         block_number,
         price,
-        cex_price
-    from {{ ref('fct_polygon_sim_pool_prices') }}
+        cex_price,
+        eth_price
+    from {{ ref('fct_arbitrum_sim_pool_prices') }}
     where cex_price is not null
 ),
 
@@ -54,9 +58,13 @@ prices_data as (
 pool_reserves as (
     select
         r.block_number,
-        'ae8f935830f6b418804836eacb0243447b6d977c000200000000000000000ad1' as pool_id,
+        r.pool_id,
         r.reserve_0 * p.price as reserve_0_usd,
-        r.reserve_1 as reserve_1_usd,
+        case
+            when r.token1_address = '0x82af49447d8a07e3bd95bd0d56f35241523fbab1'
+                then multiply(r.reserve_1, p.eth_price)
+            else r.reserve_1
+        end as reserve_1_usd,
         f.fee_tier,
         f.fee_type,
         f.multiplier,
@@ -68,7 +76,7 @@ pool_reserves as (
     inner join swaps_data s on r.block_number = s.block_number
     left join fees_data f on r.block_number = f.block_number
     where s.price_target is not null
-        and (r.block_number <= 54445409 or r.block_number > 55278791)
+        and (r.block_number <= 188600485 or r.block_number > 196038995)
 )
 
 select * from pool_reserves

@@ -1,6 +1,7 @@
 {{ 
     config(
-        materialized = 'table'
+        materialized = 'table',
+        tags = ['arbitrum']
     ) 
 }}
 
@@ -22,54 +23,61 @@ with fees_data as (
     {% endfor %}
 ),
 
-reserves_data AS (
-    SELECT
+reserves_data as (
+    select
         pool_id,
         block_number,
-        reserve0,
-        reserve1
-    FROM {{ ref('fct_arbitrum_sim_liquidity') }}
+        token0_address,
+        token1_address,
+        reserve_0,
+        reserve_1
+    from {{ ref('fct_arbitrum_sim_liquidity') }}
 ),
 
--- CTE for swaps data
-swaps_data AS (
-    SELECT
+-- cte for swaps data
+swaps_data as (
+    select
         pool_id,
         block_number,
         price_target
-    FROM {{ ref('int_arbitrum_sim_swaps') }}
+    from {{ ref('int_arbitrum_sim_swaps') }}
 ),
 
--- CTE for prices data
-prices_data AS (
-    SELECT
+-- cte for prices data
+prices_data as (
+    select
         pool_id,
         block_number,
         price,
-        cex_price
-    FROM {{ ref('fct_arbitrum_sim_pool_prices') }}
-    WHERE cex_price IS NOT NULL
+        cex_price,
+        eth_price
+    from {{ ref('fct_arbitrum_sim_pool_prices') }}
+    where cex_price is not null
 ),
 
--- Main pool_reserves CTE
-pool_reserves AS (
-    SELECT
+-- main pool_reserves cte
+pool_reserves as (
+    select
         r.block_number,
         r.pool_id,
-        r.reserve0 * p.price AS reserve_0_usd,
-        r.reserve1 AS reserve_1_usd,
+        r.reserve_0 * p.price as reserve_0_usd,
+        case
+            when r.token1_address = '0x82af49447d8a07e3bd95bd0d56f35241523fbab1'
+                then multiply(r.reserve_1, p.eth_price)
+            else r.reserve_1
+        end as reserve_1_usd,
         f.fee_tier,
         f.fee_type,
         f.multiplier,
         s.price_target,
-        p.price AS pool_price, 
-        p.cex_price AS open_price
-    FROM reserves_data r
-    INNER JOIN prices_data p ON r.block_number = p.block_number
-    INNER JOIN swaps_data s ON r.block_number = s.block_number
-    LEFT JOIN fees_data f ON r.block_number = f.block_number
-    WHERE s.price_target IS NOT NULL
-        AND (r.block_number <= 188600485 OR r.block_number > 196038995)
+        p.price as pool_price, 
+        p.cex_price as open_price
+    from reserves_data r
+    inner join prices_data p on r.block_number = p.block_number
+    inner join swaps_data s on r.block_number = s.block_number
+    left join fees_data f on r.block_number = f.block_number
+    where s.price_target is not null
+        and (r.block_number <= 188600485 or r.block_number > 196038995)
 )
 
-SELECT * FROM pool_reserves
+select * from pool_reserves

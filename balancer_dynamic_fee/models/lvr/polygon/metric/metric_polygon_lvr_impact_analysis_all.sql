@@ -1,6 +1,7 @@
 {{ 
     config(
-        materialized = 'table'
+        materialized = 'table',
+        tags = ['polygon']
     ) 
 }}
 
@@ -50,6 +51,18 @@ union all
         sum(fee) as total_fees,
         avg(fee_tier) as avg_fee_tier
     from {{ ref('int_polygon_lvr_fee_volatility') }}
+    group by 2, 4
+union all
+    select
+        'ae8f935830f6b418804836eacb0243447b6d977c000200000000000000000ad1' AS pool_id,
+        fee_type,
+        'static' as category,
+        multiplier,
+        count(case when can_have_lvr then 1 end) as lvr_occurrences,
+        sum(lvr_value) as total_lvr,
+        sum(fee) as total_fees,
+        avg(fee_tier) as avg_fee_tier
+    from {{ ref('int_polygon_lvr_fee_static') }}
     group by 2, 4
 ),
 

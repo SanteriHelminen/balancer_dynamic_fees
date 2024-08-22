@@ -1,17 +1,18 @@
 {{ 
     config(
-        materialized = 'table'
+        materialized = 'table',
+        tags = ['arbitrum']
     ) 
 }}
 
-WITH pool_reserves AS (
-    SELECT * FROM {{ ref('int_arbitrum_lvr_fee_volatility_pool_reserves1') }}
-    UNION ALL
-    SELECT * FROM {{ ref('int_arbitrum_lvr_fee_volatility_pool_reserves2') }}
+with pool_reserves as (
+    select * from {{ ref('int_arbitrum_lvr_fee_volatility_pool_reserves1') }}
+    union all
+    select * from {{ ref('int_arbitrum_lvr_fee_volatility_pool_reserves2') }}
 ),
 
-lvr_calculation AS (
-    SELECT
+lvr_calculation as (
+    select
         block_number,
         pool_id,
         pool_price,
@@ -20,50 +21,50 @@ lvr_calculation AS (
         fee_tier,
         fee_type,
         multiplier,
-        ABS(pool_price - open_price) AS price_difference,
-        SQRT(reserve_0_usd * reserve_1_usd) AS liquidity,
-        SQRT(reserve_0_usd * reserve_1_usd) * ABS((price_target - pool_price)/pool_price) AS executed_qty,
-        SQRT(pool_price * price_target) AS average_price,
-        CASE
-            WHEN (pool_price < price_target) AND (price_target < open_price) AND (price_target / pool_price > 1 + fee_tier) THEN TRUE
-            WHEN (pool_price > price_target) AND (price_target > open_price) AND (pool_price / price_target > 1 + fee_tier) THEN TRUE
-            ELSE FALSE
-        END AS can_have_lvr
-    FROM pool_reserves
-    WHERE (block_number <= 188600485 OR block_number > 196038995)
+        abs(pool_price - open_price) as price_difference,
+        sqrt(reserve_0_usd * reserve_1_usd) as liquidity,
+        sqrt(reserve_0_usd * reserve_1_usd) * abs((price_target - pool_price)/pool_price) as executed_qty,
+        sqrt(pool_price * price_target) as average_price,
+        case
+            when (pool_price < price_target) and (price_target < open_price) and (price_target / pool_price > 1 + fee_tier) then true
+            when (pool_price > price_target) and (price_target > open_price) and (pool_price / price_target > 1 + fee_tier) then true
+            else false
+        end as can_have_lvr
+    from pool_reserves
+    where (block_number <= 188600485 or block_number > 196038995)
 ),
 
-price_difference_percentiles AS (
-    SELECT
+price_difference_percentiles as (
+    select
         pool_id,
         multiplier,
         fee_type,
-        PERCENTILE_CONT(0.9) WITHIN GROUP (ORDER BY price_difference) AS ninetyfifth_percentile
-    FROM lvr_calculation
-    GROUP BY pool_id, multiplier, fee_type
+        percentile_cont(0.9) within group (order by price_difference) as ninetyfifth_percentile
+    from lvr_calculation
+    group by pool_id, multiplier, fee_type
 ),
 
-lvr_results AS (
-    SELECT
+lvr_results as (
+    select
         l.block_number,
         l.pool_id,
         l.fee_tier,
         l.fee_type,
         l.multiplier,
-        IF(l.can_have_lvr, l.executed_qty * ABS((l.open_price - l.average_price)/l.average_price), 0) AS lvr_value,
-        IF(l.can_have_lvr, l.fee_tier * l.executed_qty, 0) AS fee,
+        if(l.can_have_lvr, l.executed_qty * abs((l.open_price - l.average_price)/l.average_price), 0) as lvr_value,
+        if(l.can_have_lvr, l.fee_tier * l.executed_qty, 0) as fee,
         l.can_have_lvr
-    FROM lvr_calculation l
-    JOIN price_difference_percentiles p 
-        ON l.pool_id = p.pool_id 
-        AND l.multiplier = p.multiplier 
-        AND l.fee_type = p.fee_type
-    WHERE l.price_difference <= p.ninetyfifth_percentile
+    from lvr_calculation l
+    join price_difference_percentiles p 
+        on l.pool_id = p.pool_id 
+        and l.multiplier = p.multiplier 
+        and l.fee_type = p.fee_type
+    where l.price_difference <= p.ninetyfifth_percentile
 )
 
-SELECT DISTINCT
+select distinct
     pools.pool_name,
     lvr.* 
-FROM lvr_results lvr
+from lvr_results lvr
 left join {{ ref('dim_pools') }} pools on pools.pool_id = lvr.pool_id
-ORDER BY block_number, lvr.pool_id, fee_type, multiplier
+order by block_number, lvr.pool_id, fee_type, multiplier

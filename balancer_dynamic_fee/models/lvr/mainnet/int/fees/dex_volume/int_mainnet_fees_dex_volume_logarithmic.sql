@@ -1,19 +1,20 @@
 {{ 
     config(
-        materialized = 'table'
+        materialized = 'table',
+        tags = ['mainnet', 'mainnet_volume']
     ) 
 }}
 
 {% set multipliers = [50, 100, 250, 500, 750, 1000] %}
 {% set min_fee = 0.001 %}
 {% set max_fee = 0.01 %}
-{% set volume_offset = 1 %}  -- To handle potential zero volumes
+{% set volume_offset = 1 %}
 
 with dex_data as (
     select
         block_number,
         pool_id,
-        volume  -- This is already normalized by reserves
+        volume
     from {{ ref('int_mainnet_dex_volume') }}
 ),
 

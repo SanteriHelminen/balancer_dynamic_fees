@@ -1,16 +1,12 @@
 {{ 
     config(
         materialized = 'table',
-        tags = ['mainnet', 'mainnet_volatility']
+        tags = ['mainnet', 'mainnet_static']
     ) 
 }}
 
 {% set fee_sources = [
-    'int_mainnet_fees_exponential',
-    'int_mainnet_fees_logarithmic',
-    'int_mainnet_fees_quadratic',
-    'int_mainnet_fees_sigmoid',
-    'int_mainnet_fees_volatility',
+    'int_mainnet_fees_static',
 ] %}
 
 with 
@@ -73,6 +69,8 @@ lvr_calculation_{{ loop.index }} as (
         reserve_1,
         fee_tier,
         fee_type,
+        reserve_0_usd,
+        reserve_1_usd,
         multiplier,
         abs(pool_price - open_price) as price_difference,
         sqrt(reserve_0_usd * reserve_1_usd) as liquidity,
@@ -94,7 +92,7 @@ price_difference_percentiles as (
         pool_id,
         multiplier,
         fee_type,
-        percentile_cont(0.9) within group (order by price_difference) as ninetyfifth_percentile
+        percentile_cont(0.90) within group (order by price_difference) as ninetyfifth_percentile
     from (
         {% for i in range(1, fee_sources | length + 1) %}
         select pool_id, price_difference from lvr_calculation_{{ i }}
@@ -116,6 +114,8 @@ lvr_results_{{ i }} as (
         l.executed_qty,
         l.fee_tier,
         l.fee_type,
+        l.reserve_0_usd,
+        l.reserve_1_usd,
         l.multiplier,
         if(can_have_lvr, executed_qty * ABS((open_price - average_price)/average_price), 0) AS lvr_value,
         if(can_have_lvr, fee_tier * executed_qty, 0) AS fee,

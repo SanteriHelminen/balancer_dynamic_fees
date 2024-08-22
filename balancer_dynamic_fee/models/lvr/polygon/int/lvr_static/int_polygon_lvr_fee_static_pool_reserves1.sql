@@ -6,10 +6,7 @@
 }}
 
 {% set fee_sources = [
-    'int_polygon_fees_gas_exponential',
-    'int_polygon_fees_gas_logarithmic',
-    'int_polygon_fees_gas_mean',
-    'int_polygon_fees_gas_sigmoid',
+    'int_polygon_fees_static'
 ] %}
 
 with fees_data as (
@@ -68,7 +65,7 @@ pool_reserves as (
     inner join swaps_data s on r.block_number = s.block_number
     left join fees_data f on r.block_number = f.block_number
     where s.price_target is not null
-        and (r.block_number <= 54445409 or r.block_number > 55278791)
+        and (r.block_number <= 188600485 or r.block_number > 196038995)
 )
 
 select * from pool_reserves

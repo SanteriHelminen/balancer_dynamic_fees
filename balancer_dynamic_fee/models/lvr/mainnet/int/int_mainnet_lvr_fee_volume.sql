@@ -1,6 +1,7 @@
 {{ 
     config(
-        materialized = 'table'
+        materialized = 'table',
+        tags = ['mainnet', 'mainnet_volume']
     ) 
 }}
 
@@ -31,13 +32,13 @@ pool_reserves_{{ loop.index }} as (
         reserves.pool_id,
         reserves.weight_0,
         reserves.weight_1,
-        reserves.reserve0,
-        reserves.reserve0 * prices.price as reserve_0_usd,
-        reserves.reserve1,
+        reserves.reserve_0,
+        reserves.reserve_0 * prices.price as reserve_0_usd,
+        reserves.reserve_1,
         case
             when reserves.token1_address = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
-                then reserves.reserve1 * prices.eth_price
-            else reserves.reserve1
+                then multiply(reserves.reserve_1, prices.eth_price)
+            else reserves.reserve_1
         end as reserve_1_usd,
         fees_{{ loop.index }}.fee_tier,
         fees_{{ loop.index }}.fee_type,
@@ -69,8 +70,8 @@ lvr_calculation_{{ loop.index }} as (
         pool_price,
         price_target,
         open_price,
-        reserve0,
-        reserve1,
+        reserve_0,
+        reserve_1,
         fee_tier,
         fee_type,
         multiplier,

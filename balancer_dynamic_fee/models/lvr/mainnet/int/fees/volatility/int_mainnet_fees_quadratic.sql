@@ -1,11 +1,12 @@
 {{ 
     config(
-        materialized = 'table'
+        materialized = 'table',
+        tags = ['mainnet', 'mainnet_volatility']
     ) 
 }}
 
-{% set multiplier = [100, 500, 1000, 2500, 5000] %}
-{% set base_fee = 0.005 %}
+{% set multiplier = [10, 50, 100, 500, 1000, 2500, 5000, 10000, 15000] %}
+{% set base_fee = 0.003 %}
 
 with fees as (
     {% for multiplier in multiplier %}

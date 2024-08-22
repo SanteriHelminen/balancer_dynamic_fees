@@ -1,6 +1,7 @@
 {{ 
     config(
-        materialized = 'view'
+        materialized = 'table',
+        tags = ['polygon']
     ) 
 }}
 

@@ -1,6 +1,7 @@
 {{ 
     config(
-        materialized = 'table'
+        materialized = 'table',
+        tags = ['polygon']
     ) 
 }}
 
@@ -16,7 +17,7 @@ pool_reserves as (
     select
         reserves.block_number,
         reserves.pool_id,
-        reserves.reserve0 * prices.price as reserve_0_usd,
+        reserves.reserve_0 * prices.price as reserve_0_usd,
         reserves.reserve_1 as reserve_1_usd,
         fees.fee_tier,
         swaps.price_target,

@@ -1,6 +1,7 @@
 {{ 
     config(
-        materialized = 'table'
+        materialized = 'table',
+        tags = ['arbitrum']
     ) 
 }}
 
@@ -16,8 +17,12 @@ pool_reserves as (
     select
         reserves.block_number,
         reserves.pool_id,
-        reserves.reserve0 * prices.price as reserve_0_usd,
-        reserves.reserve_1 as reserve_1_usd,
+        reserves.reserve_0 * prices.price as reserve_0_usd,
+        case
+            when reserves.token1_address = '0x82af49447d8a07e3bd95bd0d56f35241523fbab1'
+                then multiply(reserves.reserve_1, prices.eth_price)
+            else reserves.reserve_1
+        end as reserve_1_usd,
         fees.fee_tier,
         swaps.price_target,
         prices.price as pool_price, 

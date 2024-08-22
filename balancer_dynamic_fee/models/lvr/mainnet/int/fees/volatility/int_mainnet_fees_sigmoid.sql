@@ -1,12 +1,13 @@
 {{ 
     config(
-        materialized = 'table'
+        materialized = 'table',
+        tags = ['mainnet', 'mainnet_volatility']
     ) 
 }}
 
-{% set multipliers = [0.001, 0.002, 0.005, 0.01] %}
-{% set min_fee = 0.001 %}
-{% set max_fee = 0.006 %}
+{% set multipliers = [0.005, 0.1, 0.2, 1, 5, 10, 100, 500, 1000] %}
+{% set min_fee = 0.003 %}
+{% set max_fee = 0.01 %}
 
 with volatility_stats as (
     select
