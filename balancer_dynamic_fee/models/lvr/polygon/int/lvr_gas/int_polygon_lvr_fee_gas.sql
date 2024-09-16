@@ -1,7 +1,7 @@
 {{ 
     config(
         materialized = 'table',
-        tags = ['polygon']
+        tags = ['polygon', 'polygon_lvr']
     ) 
 }}
 

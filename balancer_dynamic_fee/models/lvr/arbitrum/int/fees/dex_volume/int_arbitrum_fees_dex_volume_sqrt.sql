@@ -1,7 +1,7 @@
 {{ 
     config(
         materialized = 'table',
-        tags = ['arbitrum']
+        tags = ['arbitrum', 'arbitrum_lvr']
     ) 
 }}
 

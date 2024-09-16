@@ -1,7 +1,7 @@
 {{ 
     config(
         materialized = 'table',
-        tags = ['mainnet']
+        tags = ['mainnet', 'mainnet_lvr']
     ) 
 }}
 

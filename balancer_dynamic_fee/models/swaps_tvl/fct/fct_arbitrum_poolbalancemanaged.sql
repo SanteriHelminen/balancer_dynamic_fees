@@ -1,6 +1,7 @@
 {{ 
     config(
         materialized = 'table'
+        tags = ['swaps_tvl']
     ) 
 }}
 
