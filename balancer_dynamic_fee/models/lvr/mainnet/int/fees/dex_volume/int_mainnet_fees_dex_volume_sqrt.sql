@@ -1,7 +1,7 @@
 {{ 
     config(
         materialized = 'table',
-        tags = ['mainnet', 'mainnet_lvr', 'mainnet_volume']
+        tags = ['mainnet', 'mainnet_lvr', 'mainnet_fees']
     ) 
 }}
 
