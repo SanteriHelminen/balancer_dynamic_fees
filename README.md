@@ -34,6 +34,7 @@ Download and extract the data to the raw_data folder and run all raw_[  ].ipynb 
 CEX data tables include price data for all pool assets.
 
 Download 1s K-Line data from https://www.binance.com/en/landing/data for the following pairs between Aug 2023 and June 2024
+
 ![Screenshot 2024-09-17 at 3 39 47 AM](https://github.com/user-attachments/assets/6100fb6d-df05-4efc-bee8-9b15cc3bbd79)
 
 Extract klines files into correct folders.
