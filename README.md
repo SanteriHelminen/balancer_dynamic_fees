@@ -16,7 +16,7 @@ This project is done in collaboration with @AnteroE.
 This project uses DBT with DuckDB local data warehouse. 
 
 Running the models locally requires around 100GB of hard drive space and 24GB of RAM. As a reference, all models take around 1.5h to run 
-on a 16GB M1 Macbook while using .
+on a 16GB M1 Macbook.
 
 ### 1. Setup
 
