@@ -75,6 +75,8 @@ dbt run -m tag: mainnet_lvr
 dbt run -m tag: polygon_lvr
 ```
 
+You will have to adjust fee function **multipliers**, **min_fee**, and **max_fee** pool by pool due to changing input variables.
+
 ### 6. Analysis
 
 DuckDB tables can be fetched into e.g. Pandas dataframes for analysis. **visualization.ipynb** in the main folder demonstrates how to
