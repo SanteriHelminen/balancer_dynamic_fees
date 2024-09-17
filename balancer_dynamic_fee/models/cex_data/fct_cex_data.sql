@@ -1,7 +1,8 @@
 {{ 
     config(
         materialized = 'table',
-        cluster_by = ['pool_id']
+        cluster_by = ['pool_id'],
+        tags = ['prices']
     ) 
 }}
 

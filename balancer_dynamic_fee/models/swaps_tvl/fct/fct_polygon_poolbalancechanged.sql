@@ -9,7 +9,7 @@ with raw_balance_change as (
     select
         polygon_poolbalancechanged.*,
         pools.pool_name
-    from polygon_poolbalancechanged
+    from {{ ref('polygon_poolbalancechanged') }}
     inner join {{ ref('dim_pools') }} as pools
     on polygon_poolbalancechanged.pool_id = pools.pool_id
 ),
