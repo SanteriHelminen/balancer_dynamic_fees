@@ -1,5 +1,9 @@
 # Dynamic fee and loss-versus-rebalancing models for Balancer pools
 
+This project, funded by a Balancer Grant, explores dynamic fee models to mitigate arbitrage losses in Balancer pools. Our research examines the efficacy of various fee structures based on factors such as volatility, DEX trading volume, and gas prices across Ethereum mainnet, Arbitrum, and Polygon networks. The goal is to improve pool profitability by capturing a larger portion of CEX-DEX arbitrage opportunities, ultimately benefiting liquidity providers and the Balancer ecosystem.
+
+This project is done in collaboration with @AnteroE.
+
 ## Project structure
 
 - **raw_data**: Initial transformations and DuckDB table creations for scraped vault and pool event data.
