@@ -15,8 +15,10 @@ This project is done in collaboration with @AnteroE.
 
 This project uses DBT with DuckDB local data warehouse. 
 
-Running the models locally requires around 100GB of hard drive space and 24GB of RAM. As a reference, all models take around 1.5h to run 
+Running the models locally requires around 100GB of hard drive space and 24GB of RAM. As a reference, all models take around 3h to run 
 on a 16GB M1 Macbook.
+
+Mainnet and other models can be run separately.
 
 ### 1. Setup
 
@@ -24,7 +26,7 @@ Download the whole **balancer_dynamic_fee** folder
 
 Run
 ```
-pip install requirements
+pip install -r requirements.txt
 ```
 
 ### 2. Raw data transformations
