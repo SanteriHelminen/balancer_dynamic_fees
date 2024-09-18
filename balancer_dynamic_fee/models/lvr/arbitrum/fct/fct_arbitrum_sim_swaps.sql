@@ -7,9 +7,9 @@
 
 with block_timestamps as (
     select
-        block_number as blockno,
+        block_number as block_number,
         CAST(SUBSTR(CAST(timestamp AS STRING), 1, 19) AS TIMESTAMP) AS block_timestamp
-    from arbitrum_timestamps
+    from arbitrum_block_timestamp
 ),
 
 grouped_swaps as (
@@ -24,7 +24,7 @@ grouped_swaps as (
         MAX(swaps.token_out_1) as token_out_1
     from {{ref('metric_arbitrum_swaps')}} swaps
     left join block_timestamps timestamps
-        on timestamps.blockno = swaps.block_number
+        on timestamps.block_number = swaps.block_number
     where swaps.block_number >= 125207823
     group by swaps.block_number, swaps.pool_id
 ),

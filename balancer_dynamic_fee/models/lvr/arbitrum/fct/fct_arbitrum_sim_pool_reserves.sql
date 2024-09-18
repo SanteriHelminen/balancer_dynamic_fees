@@ -11,9 +11,9 @@
 -- convert block_timestamp
 with block_timestamps as (
     select
-        block_number as blockno,
+        block_number,
         CAST(SUBSTR(CAST(timestamp AS STRING), 1, 19) AS TIMESTAMP) AS block_timestamp
-    from arbitrum_timestamps
+    from arbitrum_block_timestamp
 ),
 
 tvl_timestamps as (
@@ -26,7 +26,7 @@ tvl_timestamps as (
         tvl.reserve
     from {{ref('metric_arbitrum_tvl')}} tvl
     left join block_timestamps timestamps
-        on tvl.block_number = timestamps.blockno
+        on tvl.block_number = timestamps.block_number
 ),
 
 token_1_reserves as (

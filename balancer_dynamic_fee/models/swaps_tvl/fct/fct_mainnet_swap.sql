@@ -18,7 +18,7 @@ with swaps as (
         lower(token_out) as token_out,
         cast(amount_in as hugeint) as amount_in,
         -cast(amount_out as hugeint) as amount_out
-    from {{ ref('mainnet_swap') }}
+    from mainnet_swap
 ),
 
 final as (

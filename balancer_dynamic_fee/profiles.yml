@@ -1,0 +1,9 @@
+balancer_dynamic_fee:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: './raw_data/balancer_dynamic_fee.duckdb'
+      extensions:
+        - httpfs
+        - parquet

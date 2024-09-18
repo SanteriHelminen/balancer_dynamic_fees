@@ -16,7 +16,7 @@ with balance_manage as (
         pool_id as pool_id,
         token as token_address,
         cast(cash_delta as hugeint) as token_delta,
-    from {{ ref('polygon_poolbalancemanaged') }}
+    from polygon_poolbalancemanaged
 ),
 
 final as (
