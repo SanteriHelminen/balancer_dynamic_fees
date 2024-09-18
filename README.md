@@ -16,7 +16,7 @@ This project is done in collaboration with @AnteroE.
 This project uses DBT with DuckDB local data warehouse. 
 
 Running the models locally requires around 100GB of hard drive space and 24GB of RAM. As a reference, all models take around 1.5h to run 
-on a 16GB M1 Macbook while using .
+on a 16GB M1 Macbook.
 
 ### 1. Setup
 
@@ -74,6 +74,8 @@ dbt run -m tag: arbitrum_lvr
 dbt run -m tag: mainnet_lvr
 dbt run -m tag: polygon_lvr
 ```
+
+You will have to adjust fee function **multipliers**, **min_fee**, and **max_fee** pool by pool due to changing input variables.
 
 ### 6. Analysis
 
