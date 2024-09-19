@@ -15,9 +15,9 @@ with final as (
         trades.token_out as token_out,
         fee_tier_updates.fee_tier as fee_tier,
         divide(abs(trades.amount_in), pow(10, cast(tokens0.decimals as numeric)))
-            as token_in,
+            as token_in_1,
         divide(abs(trades.amount_out), pow(10, cast(tokens1.decimals as numeric)))
-            as token_out,
+            as token_out_1,
     from {{ ref('fct_polygon_swap') }} as trades
     left join {{ ref('dim_polygon_decimals') }} as tokens0
         on

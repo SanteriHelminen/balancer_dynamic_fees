@@ -56,7 +56,7 @@ union all
     select
         pool_id,
         fee_type,
-        'Static' as category,
+        'static' as category,
         fee_tier as multiplier,
         count(case when can_have_lvr then 1 end) as lvr_occurrences,
         sum(lvr_value) as total_lvr,
