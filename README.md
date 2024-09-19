@@ -6,7 +6,7 @@ This project is done in collaboration with @AnteroE.
 
 ## Project structure
 
-This project 
+This project handles the model calculations in a DBT ([documentation](https://docs.getdbt.com/docs/introduction)) project using a local data warehouse DuckDB ([Documentation](https://duckdb.org/docs/index)).
 
 - **raw_data**: Initial transformations and DuckDB table creations for scraped vault and pool event data.
 - **cex_data**: Creates DuckDB tables from CEX price data. The data used is 1s klines data from https://www.binance.com/en/landing/data.
@@ -75,14 +75,26 @@ An arbitrage opportunity is identified when:
 - The pool price is lower than the price target, which is lower than the open price, and the price ratio exceeds the fee tier.
 - Or, the pool price is higher than the price target, which is higher than the open price, and the inverse price ratio exceeds the fee tier.
 
+### Interpretation
+The LVR represents the theoretical maximum arbitrage value available in a given block where a swap occurred. It quantifies the potential profit an arbitrageur could make by trading between the pool and the CEX, assuming they could execute at the calculated prices.
+
+### Limitations
+
+1. **Ideal Conditions**: The model assumes perfect execution and doesn't account for slippage, transaction costs, or partial fills. This may distort the results during times with high gas fees, for example.
+2. **Block-Level Granularity**: Calculations are done at the block level, which may not capture intra-block price movements or MEV opportunities.
+3. **Single CEX Reference**: We use Binance as the sole reference for CEX prices. Adding other price data sources and averaging the prices in **cex_data** may give a more complete view.
+4. **Simplified Price Impact**: The model uses a simplified approach to estimate price impact, which may not perfectly reflect real-world dynamics.
+5. **No Cross-Pool Arbitrage**: The model doesn't account for potential arbitrage opportunities across multiple pools or protocols.
+6. **Outlier Filtering**: We filter out the top 10% of price differences to reduce the impact of extreme outliers, which may exclude some valid arbitrage opportunities.
+7. **Swap-Based Calculation**: By only calculating LVR for blocks where swaps occurred, we may miss potential arbitrage opportunities in blocks without swaps. However, this approach provides a more realistic comparison to historical pool performance.
+8. **Historical Data Dependency**: The model's insights are based on past market conditions and may not perfectly predict future arbitrage opportunities or fee performance.
+
 ## How to run the models
 
-This project uses DBT with DuckDB local data warehouse. 
-
-Running the models locally requires around 100GB of hard drive space and 24GB of RAM. As a reference, all models take around 3h to run 
+Running the models locally requires around 100GB of hard drive space and >24GB of RAM. As a reference, all models take around 3-4h to run 
 on a 16GB M1 Macbook.
 
-Mainnet and other models can be run separately.
+The models on each chain can be run separately.
 
 ### 1. Setup
 
