@@ -1,15 +1,79 @@
 # Dynamic fee and loss-versus-rebalancing models for Balancer pools
 
-This project, funded by a Balancer Grant, explores dynamic fee models to mitigate arbitrage losses in Balancer pools. Our research examines the efficacy of various fee structures based on factors such as volatility, DEX trading volume, and gas prices across Ethereum mainnet, Arbitrum, and Polygon networks. The goal is to improve pool profitability by capturing a larger portion of CEX-DEX arbitrage opportunities, ultimately benefiting liquidity providers and the Balancer ecosystem.
+This project, funded by a Balancer Grant, explores dynamic fee models to mitigate arbitrage losses in Balancer pools. Our research examines the efficacy of various fee structures based on factors such as volatility, DEX trading volume, and gas prices across Ethereum mainnet, Arbitrum, and Polygon networks. The goal is to improve pool profitability by capturing a larger portion of CEX/DEX arbitrage opportunities, ultimately benefiting liquidity providers and the Balancer ecosystem.
 
 This project is done in collaboration with @AnteroE.
 
 ## Project structure
 
+This project 
+
 - **raw_data**: Initial transformations and DuckDB table creations for scraped vault and pool event data.
 - **cex_data**: Creates DuckDB tables from CEX price data. The data used is 1s klines data from https://www.binance.com/en/landing/data.
 - **swaps_tvl**: Calculates swaps and token reserves for pools.
-- **lvr**: LVR calculations for pools.
+- **lvr**: LVR (CEX/DEX arbitrage) calculations for pools.
+
+## Arbitrage calculation
+
+> [!IMPORTANT]
+> "Loss Versus Rebalancing arbitrage" and "CEX/DEX arbitrage" are used interchangeably in the material. For our purposes, these two mean the same thing.
+
+Our model calculates the theoretical CEX/DEX arbitrage opportunity in each block where a swap has historically occurred in the pool. This approach enables direct comparison with the current fee function.
+
+Here's a detailed breakdown of the calculation process:
+
+### 1. Data Preparation
+
+- In the **fct** folder we collect pool reserves, prices, and swap fee data for each block where a swap occurred. Token reserves are normalized to 50/50 ratio in **fct_[chain]_sim_liquidity**.
+- CEX (Binance) price data is matched to each block timestamp.
+
+### 2. Price Target Calculation
+
+The price target is the optimal price an arbitrageur would trade at to maximize profit, considering the pool's fee. The price target is calculated based on the CEX price and the pool's fee tier:
+```sql
+price_target = 
+    if CEX_price > pool_price:
+        CEX_price * (1 - fee_tier)
+    else:
+        CEX_price * (1 + fee_tier)
+```
+
+### 3. Arbitrage calculation
+
+**Liquidity**: We calculate the geometric mean of the USD values of both reserves to represent the pool's liquidity:
+```sql
+liquidity = sqrt(reserve_0_usd * reserve_1_usd)
+```
+
+**Executed Quantity**: This represents the theoretical amount of assets that would be traded in an arbitrage opportunity:
+```sql
+executed_qty = liquidity * abs((price_target - pool_price) / pool_price)
+```
+This formula estimates the trade size based on the price difference and the pool's liquidity. The executed quantity represents the theoretical amount of tokens the arbitrageur would need to trade to move the pool price to the price target.
+
+**Average Price**: We estimate the average price at which the arbitrage trade would occur:
+```sql
+average_price = sqrt(pool_price * price_target)
+```
+This geometric mean represents a midpoint between the pool price and the target price.
+
+**LVR Value**: This is the core of the LVR (CEX/DEX) calculation, representing the theoretical profit from the arbitrage:
+```sql
+lvr_value = executed_qty * abs((open_price - average_price) / average_price)
+```
+This formula calculates the profit by multiplying the executed quantity by the percentage difference between the open (CEX) price and the average trade price.
+
+### 4. Fee Calculation
+The fee collected by the pool is calculated as:
+```sql
+fee = fee_tier * executed_qty
+```
+This represents the revenue the pool would generate from the arbitrage trade.
+
+### 5. Arbitrage Opportunity Identification
+An arbitrage opportunity is identified when:
+- The pool price is lower than the price target, which is lower than the open price, and the price ratio exceeds the fee tier.
+- Or, the pool price is higher than the price target, which is higher than the open price, and the inverse price ratio exceeds the fee tier.
 
 ## How to run the models
 
@@ -90,7 +154,7 @@ import duckdb
 import pandas as pd
 
 # Connect to the DuckDB database, fetch data
-con = duckdb.connect('my_database.duckdb')
+con = duckdb.connect('raw_data/balancer_dynamic_fee.duckdb')
 df = con.execute("SELECT * FROM metric_mainnet_lvr_impact_analysis_all").fetchdf()
 con.close()
 ```
