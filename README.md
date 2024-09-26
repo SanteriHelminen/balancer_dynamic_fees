@@ -6,7 +6,7 @@ This project is done in collaboration with [@AnteroE](https://github.com/AnteroE
 
 ## Project Structure
 
-This project handles the model calculations in a DBT ([documentation](https://docs.getdbt.com/docs/introduction)) project using a local data warehouse DuckDB ([Documentation](https://duckdb.org/docs/index)).
+This project handles the model calculations in a DBT ([documentation](https://docs.getdbt.com/docs/introduction)) project using a local data warehouse DuckDB ([documentation](https://duckdb.org/docs/index)).
 
 - **raw_data**: Initial transformations and DuckDB table creations for scraped vault and pool event data.
 - **cex_data**: Creates DuckDB tables from CEX price data. The data used is 1s klines data from https://www.binance.com/en/landing/data.
