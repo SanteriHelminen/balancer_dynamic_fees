@@ -18,9 +18,9 @@ with fees as (
             volatility.volatility as volatility,
             least(coalesce({{ base_fee }} + ({{ multiplier }} * volatility.volatility), {{base_fee}}), 0.01) as fee_tier
         from {{ ref('int_polygon_sim_swaps') }} as swaps
-        left join {{ ref('int_polygon_volatility') }} as volatility
+        asof join {{ ref('int_polygon_volatility') }} as volatility
             on
-                swaps.block_number = volatility.block_number
+                swaps.block_number >= volatility.block_number + 1
                 and swaps.pool_id = volatility.pool_id
         {% if not loop.last %}UNION ALL{% endif %}
     {% endfor %}

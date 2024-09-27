@@ -50,13 +50,12 @@ volatility_calc as (
 )
 
 select
-    start_block as block_number,
+    end_block as block_number,
     start_timestamp as timestamp,
     pool_id,
     avg_price as raw_price,
     avg_market_price as price,
     volatility,
-    end_block,
     end_timestamp
 from volatility_calc
 order by start_block, pool_id

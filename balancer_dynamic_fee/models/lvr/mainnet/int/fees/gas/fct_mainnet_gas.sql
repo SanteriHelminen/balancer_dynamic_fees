@@ -22,10 +22,10 @@ block_hourly as (
     from gas_fees
 ),
 
-hourly_sums as (
+hourly_avg as (
     select
         hour_block,
-        sum(gas_fee) as total_gas_fee
+        avg(gas_fee) as avg_gas_fee
     from block_hourly
     group by hour_block
 ),
@@ -34,10 +34,10 @@ rolling_gas as (
     select
         b.block_number,
         b.hour_block,
-        avg(h.total_gas_fee) over (order by h.hour_block rows between 1 preceding and 0 following) as gas_fee
+        h.avg_gas_fee as gas_fee
     from block_hourly b
-    join hourly_sums h
-    on b.hour_block = h.hour_block
+    join hourly_avg h
+        on b.hour_block = h.hour_block
 )
 
 select * from rolling_gas

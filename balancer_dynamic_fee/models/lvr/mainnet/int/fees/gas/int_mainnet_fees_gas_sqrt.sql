@@ -5,7 +5,7 @@
     ) 
 }}
 
-{% set multipliers = [0.00001, 0.00002, 0.00003, 0.00004, 0.00005] %}
+{% set multipliers = [0.001, 0.002, 0.003, 0.004, 0.005] %}
 {% set base_fee = 0.001 %}
 
 with gas_fees as (

@@ -35,8 +35,8 @@ fees as (
             (1 - exp(-{{ multiplier }} * coalesce(volatility.volatility, 0))) / 
             (1 + exp(-{{ multiplier }} * coalesce(volatility.volatility, 0))) as fee_tier
         from {{ ref('int_arbitrum_sim_swaps') }} as swaps
-        left join volatility_stats as volatility
-            on swaps.block_number = volatility.block_number
+        asof join volatility_stats as volatility
+            on swaps.block_number >= volatility.block_number + 1
             and swaps.pool_id = volatility.pool_id
         {% if not loop.last %}UNION ALL{% endif %}
     {% endfor %}
