@@ -4,6 +4,8 @@ This project, funded by a Balancer Grant, explores dynamic fee models to mitigat
 
 This project is done in collaboration with [@AnteroE](https://github.com/AnteroE).
 
+Link to the governance forum thread: ([link](https://forum.balancer.fi/t/research-grant-dynamic-fee-research/6017))
+
 ## Project Structure
 
 This project handles the model calculations in a DBT ([documentation](https://docs.getdbt.com/docs/introduction)) project using a local data warehouse DuckDB ([documentation](https://duckdb.org/docs/index)).
