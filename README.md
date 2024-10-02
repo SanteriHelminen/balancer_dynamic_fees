@@ -105,7 +105,7 @@ The comparison between different fee models is performed in a final analysis ste
 4. **Results Compilation**:
    - The results are compiled into a final table that includes:
      - Pool name
-     - Fee type (e.g., volume-based, gas-based)
+     - Fee type ('DEX Volume Variance', 'Mean Gas')
      - Category (volume, gas, volatility, static)
      - Multiplier or fee tier
      - Percentage changes in occurrences, quantity, and fees
